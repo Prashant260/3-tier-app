@@ -1,0 +1,118 @@
+name: BlogHub CI/CD
+
+on:
+  push:
+    branches:
+      - main
+
+  workflow_dispatch:
+    inputs:
+      action:
+        description: "apply or destroy"
+        required: true
+        default: "apply"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    env:
+      ACTION: ${{ github.event.inputs.action || 'apply' }}
+      AWS_REGION: ap-south-1
+      DOCKER_IMAGE: ${{ secrets.DOCKERHUB_USERNAME }}/bloghub:${{ github.sha }}
+      DOCKER_IMAGE_LATEST: ${{ secrets.DOCKERHUB_USERNAME }}/bloghub:latest
+      DATABASE_USERNAME: bloghub_admin
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Docker Hub
+        if: env.ACTION == 'apply'
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        if: env.ACTION == 'apply'
+        working-directory: app/BlogHub-Application
+        run: |
+          docker build -t "$DOCKER_IMAGE" -t "$DOCKER_IMAGE_LATEST" .
+          docker push "$DOCKER_IMAGE"
+          docker push "$DOCKER_IMAGE_LATEST"
+
+      - name: Terraform Apply
+        if: env.ACTION == 'apply'
+        working-directory: terraform
+        run: |
+          terraform init
+          terraform apply -auto-approve \
+            -var="db_password=${{ secrets.DB_PASSWORD }}"
+
+      - name: Get Terraform Outputs
+        if: env.ACTION == 'apply'
+        working-directory: terraform
+        run: |
+          echo "DATABASE_URL=$(terraform output -raw database_url)" >> "$GITHUB_ENV"
+          echo "APP_SERVER_IP=$(terraform output -raw app_server_ip)" >> "$GITHUB_ENV"
+
+      - name: Deploy App on EC2
+        if: env.ACTION == 'apply'
+        env:
+          DATABASE_PASSWORD: ${{ secrets.DB_PASSWORD }}
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "${{ secrets.EC2_SSH_PRIVATE_KEY }}" > ~/.ssh/ec2_key
+          chmod 600 ~/.ssh/ec2_key
+          ssh-keyscan -H "$APP_SERVER_IP" >> ~/.ssh/known_hosts
+
+          DB_PASSWORD_B64=$(printf '%s' "$DATABASE_PASSWORD" | base64 -w 0)
+
+          ssh -i ~/.ssh/ec2_key ubuntu@"$APP_SERVER_IP" \
+            "DOCKER_IMAGE='$DOCKER_IMAGE' DATABASE_URL='$DATABASE_URL' DATABASE_USERNAME='$DATABASE_USERNAME' DB_PASSWORD_B64='$DB_PASSWORD_B64' bash -s" <<'EOF'
+          set -e
+          DATABASE_PASSWORD=$(printf '%s' "$DB_PASSWORD_B64" | base64 -d)
+
+          mkdir -p /opt/bloghub
+          cd /opt/bloghub
+
+          cat > docker-compose.yml <<COMPOSE
+          services:
+            bloghub:
+              image: ${DOCKER_IMAGE}
+              container_name: bloghub-app
+              ports:
+                - "8080:8082"
+              environment:
+                DATABASE_URL: \${DATABASE_URL}
+                DATABASE_USERNAME: \${DATABASE_USERNAME}
+                DATABASE_PASSWORD: \${DATABASE_PASSWORD}
+              restart: always
+          COMPOSE
+
+          cat > .env <<ENV
+          DATABASE_URL=${DATABASE_URL}
+          DATABASE_USERNAME=${DATABASE_USERNAME}
+          DATABASE_PASSWORD=${DATABASE_PASSWORD}
+          ENV
+
+          docker compose pull
+          docker compose up -d
+          docker image prune -f
+          EOF
+
+      - name: Terraform Destroy
+        if: env.ACTION == 'destroy'
+        working-directory: terraform
+        run: |
+          terraform init
+          terraform destroy -auto-approve \
+            -var="db_password=${{ secrets.DB_PASSWORD }}"

@@ -2,6 +2,10 @@ output "app_server_ip" {
   value = module.ec2.app_server_ip
 }
 
+output "app_instance_id" {
+  value = module.ec2.app_instance_id
+}
+
 output "database_endpoint" {
   value = module.rds.database_endpoint
 }
