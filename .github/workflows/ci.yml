@@ -73,22 +73,26 @@ jobs:
         if: env.ACTION == 'apply'
         uses: appleboy/ssh-action@v1.0.0
         with:
-         host: ${{ env.APP_SERVER_IP }}
-         username: ubuntu        
-         key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
-         script: |
-            docker pull $DOCKER_IMAGE_LATEST
+          host: ${{ env.APP_SERVER_IP }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            IMAGE="${{ env.DOCKER_IMAGE_LATEST }}"
+
+            echo "Using image: $IMAGE"
+
+            docker pull $IMAGE
 
             docker stop bloghub || true
             docker rm bloghub || true
 
             docker run -d \
               -p 8080:8082 \
-              -e DB_URL=${{ env.DATABASE_URL }} \
-              -e DB_USER=${{ env.DATABASE_USERNAME }} \
-              -e DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
+              -e DB_URL="${{ env.DATABASE_URL }}" \
+              -e DB_USER="${{ env.DATABASE_USERNAME }}" \
+              -e DB_PASSWORD="${{ secrets.DB_PASSWORD }}" \
               --name bloghub \
-              $DOCKER_IMAGE_LATEST
+              $IMAGE
 
       - name: Terraform Destroy
         if: env.ACTION == 'destroy'
