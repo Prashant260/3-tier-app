@@ -45,7 +45,7 @@ jobs:
         if: env.ACTION == 'apply'
         working-directory: app/BlogHub-Application
         run: |
-          docker build -t "$DOCKER_IMAGE" -t "$DOCKER_IMAGE_LATEST" .
+          docker build -t "$DOCKER_IMAGE" -t "$DOCKER_IMAGE_LATEST" ./app/BlogHub-Application
           docker push "$DOCKER_IMAGE"
           docker push "$DOCKER_IMAGE_LATEST"
 
