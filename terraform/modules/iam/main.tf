@@ -1,7 +1,3 @@
-variable "project_name" {}
-
-variable "s3_bucket_arn" {}
-
 data "aws_region" "current" {}
 
 data "aws_caller_identity" "current" {}
