@@ -73,10 +73,10 @@ jobs:
         if: env.ACTION == 'apply'
         uses: appleboy/ssh-action@v1.0.0
         with:
-          host: ${{ env.APP_SERVER_IP }}
-          username: ${{ secrets.EC2_SSH_USER }}
-          key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
-          script: |
+         host: ${{ env.APP_SERVER_IP }}
+         username: ubuntu        
+         key: ${{ secrets.EC2_SSH_KEY }}
+         script: |
             docker pull $DOCKER_IMAGE_LATEST
 
             docker stop bloghub || true
