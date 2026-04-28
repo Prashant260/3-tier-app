@@ -34,6 +34,11 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_wrapper: false
+
       - name: Login to Docker Hub
         if: env.ACTION == 'apply'
         uses: docker/login-action@v3
@@ -43,7 +48,7 @@ jobs:
 
       - name: Build and push Docker image
         if: env.ACTION == 'apply'
-        working-directory: app/BlogHub-Application
+        working-directory: /app
         run: |
           docker build -t "$DOCKER_IMAGE" -t "$DOCKER_IMAGE_LATEST" .
           docker push "$DOCKER_IMAGE"
@@ -72,11 +77,18 @@ jobs:
           mkdir -p ~/.ssh
           printf '%s\n' "${{ secrets.EC2_SSH_PRIVATE_KEY }}" > ~/.ssh/ec2_key
           chmod 600 ~/.ssh/ec2_key
-          ssh-keyscan -H "$APP_SERVER_IP" >> ~/.ssh/known_hosts
+
+          for i in {1..30}; do
+            if ssh-keyscan -H "$APP_SERVER_IP" >> ~/.ssh/known_hosts 2>/dev/null; then
+              break
+            fi
+            echo "Waiting for EC2 SSH to become available..."
+            sleep 10
+          done
 
           DB_PASSWORD_B64=$(printf '%s' "$DATABASE_PASSWORD" | base64 -w 0)
 
-          ssh -i ~/.ssh/ec2_key ubuntu@"$APP_SERVER_IP" \
+          ssh -o StrictHostKeyChecking=yes -i ~/.ssh/ec2_key ubuntu@"$APP_SERVER_IP" \
             "DOCKER_IMAGE='$DOCKER_IMAGE' DATABASE_URL='$DATABASE_URL' DATABASE_USERNAME='$DATABASE_USERNAME' DB_PASSWORD_B64='$DB_PASSWORD_B64' bash -s" <<'EOF'
           set -e
           DATABASE_PASSWORD=$(printf '%s' "$DB_PASSWORD_B64" | base64 -d)
@@ -95,6 +107,13 @@ jobs:
                 DATABASE_URL: \${DATABASE_URL}
                 DATABASE_USERNAME: \${DATABASE_USERNAME}
                 DATABASE_PASSWORD: \${DATABASE_PASSWORD}
+              logging:
+                driver: awslogs
+                options:
+                  awslogs-region: ap-south-1
+                  awslogs-group: /bloghub/backend
+                  awslogs-stream: bloghub-app
+                  awslogs-create-group: "false"
               restart: always
           COMPOSE
 
