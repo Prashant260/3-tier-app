@@ -71,62 +71,24 @@ jobs:
 
       - name: Deploy App on EC2
         if: env.ACTION == 'apply'
-        env:
-          DATABASE_PASSWORD: ${{ secrets.DB_PASSWORD }}
-        run: |
-          mkdir -p ~/.ssh
-          printf '%s\n' "${{ secrets.EC2_SSH_PRIVATE_KEY }}" > ~/.ssh/ec2_key
-          chmod 600 ~/.ssh/ec2_key
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            docker pull $DOCKER_IMAGE_LATEST
 
-          for i in {1..30}; do
-            if ssh-keyscan -H "$APP_SERVER_IP" >> ~/.ssh/known_hosts 2>/dev/null; then
-              break
-            fi
-            echo "Waiting for EC2 SSH to become available..."
-            sleep 10
-          done
+            docker stop bloghub || true
+            docker rm bloghub || true
 
-          DB_PASSWORD_B64=$(printf '%s' "$DATABASE_PASSWORD" | base64 -w 0)
-
-          ssh -o StrictHostKeyChecking=yes -i ~/.ssh/ec2_key ubuntu@"$APP_SERVER_IP" \
-            "DOCKER_IMAGE='$DOCKER_IMAGE' DATABASE_URL='$DATABASE_URL' DATABASE_USERNAME='$DATABASE_USERNAME' DB_PASSWORD_B64='$DB_PASSWORD_B64' bash -s" <<'EOF'
-          set -e
-          DATABASE_PASSWORD=$(printf '%s' "$DB_PASSWORD_B64" | base64 -d)
-
-          mkdir -p /opt/bloghub
-          cd /opt/bloghub
-
-          cat > docker-compose.yml <<COMPOSE
-          services:
-            bloghub:
-              image: ${DOCKER_IMAGE}
-              container_name: bloghub-app
-              ports:
-                - "8080:8082"
-              environment:
-                DATABASE_URL: \${DATABASE_URL}
-                DATABASE_USERNAME: \${DATABASE_USERNAME}
-                DATABASE_PASSWORD: \${DATABASE_PASSWORD}
-              logging:
-                driver: awslogs
-                options:
-                  awslogs-region: ap-south-1
-                  awslogs-group: /bloghub/backend
-                  awslogs-stream: bloghub-app
-                  awslogs-create-group: "false"
-              restart: always
-          COMPOSE
-
-          cat > .env <<ENV
-          DATABASE_URL=${DATABASE_URL}
-          DATABASE_USERNAME=${DATABASE_USERNAME}
-          DATABASE_PASSWORD=${DATABASE_PASSWORD}
-          ENV
-
-          docker compose pull
-          docker compose up -d
-          docker image prune -f
-          EOF
+            docker run -d \
+              -p 8080:8082 \
+              -e DB_URL=${{ env.DATABASE_URL }} \
+              -e DB_USER=${{ env.DATABASE_USERNAME }} \
+              -e DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
+              --name bloghub \
+              $DOCKER_IMAGE_LATEST
 
       - name: Terraform Destroy
         if: env.ACTION == 'destroy'
