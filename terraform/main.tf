@@ -3,9 +3,7 @@ module "vpc" {
 }
 
 module "iam" {
-  source        = "./modules/iam"
-  project_name  = var.project_name
-  s3_bucket_arn = module.s3.bucket_arn
+  source = "./modules/iam"
 }
 
 module "ec2" {
@@ -27,6 +25,10 @@ module "rds" {
   app_security_group_id = module.ec2.app_security_group_id
 }
 
+module "cloudwatch" {
+  source       = "./modules/cloudwatch"
+  project_name = var.project_name
+}
 
 module "s3" {
   source      = "./modules/s3"
