@@ -27,15 +27,6 @@ module "rds" {
   app_security_group_id = module.ec2.app_security_group_id
 }
 
-module "cloudwatch" {
-  source                   = "./modules/cloudwatch"
-  project_name             = var.project_name
-  s3_bucket_arn            = module.s3.bucket_arn
-  firehose_role_arn        = module.iam.firehose_role_arn
-  cloudwatch_logs_role_arn = module.iam.cloudwatch_logs_role_arn
-
-  depends_on = [module.iam]
-}
 
 module "s3" {
   source      = "./modules/s3"
