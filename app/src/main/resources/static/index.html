@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>BlogHub - Home</title>
+    <link href="css/style.css" rel="stylesheet"/>
+    <link
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+            rel="stylesheet"
+    />
+</head>
+<body>
+<!-- Navbar -->
+<header class="navbar">
+    <div class="nav-container">
+        <div class="nav-brand">
+            <i class="fas fa-feather-alt"></i>
+            <h1>BlogHub</h1>
+        </div>
+        <nav class="nav-menu">
+            <a class="nav-link active" href="index.html">Home</a>
+            <a class="nav-link" href="posts.html">All Posts</a>
+            <a class="nav-link" href="categories.html">Categories</a>
+            <a class="nav-link admin-only" href="users.html">Users</a>
+            <a class="nav-link admin-only" href="category-create.html"
+            >Create Category</a
+            >
+            <a class="nav-link" href="post-create.html">Create Post</a>
+        </nav>
+        <div class="nav-actions">
+            <button class="theme-toggle" onclick="toggleTheme()">
+                <i class="fas fa-moon"></i>
+            </button>
+        </div>
+    </div>
+</header>
+
+<!-- Home Content -->
+<main class="main-content">
+    <section class="hero-section">
+        <div class="hero-content">
+            <h1>Welcome to BlogHub</h1>
+            <p>
+                Discover amazing stories, insights, and ideas from our community
+            </p>
+            <a class="hero-btn" href="posts.html">
+                <i class="fas fa-arrow-right"></i> Explore Posts
+            </a>
+        </div>
+        <div class="hero-stats">
+            <div class="stat-card">
+                <div class="stat-number" id="total-posts">0</div>
+                <div class="stat-label">Posts</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="total-authors">0</div>
+                <div class="stat-label">Authors</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="total-categories">0</div>
+                <div class="stat-label">Categories</div>
+            </div>
+        </div>
+    </section>
+    <section class="featured-posts">
+        <h2>Featured Posts</h2>
+        <div class="posts-grid" id="featured-posts-grid">
+            <div class="loading-spinner">
+                <i class="fas fa-spinner fa-spin"></i> Loading posts...
+            </div>
+        </div>
+    </section>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script src="js/main.js"></script>
+<script src="js/home.js"></script>
+<script>
+    //Check authentication on page load
+    window.addEventListener("DOMContentLoaded", () => {
+      if (!sessionStorage.getItem("userName")) {
+        window.location.href = "login.html";
+      }
+      updateNavbar();
+      applyRoleBasedUI();
+    });
+</script>
+</body>
+</html>

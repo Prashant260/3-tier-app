@@ -1,0 +1,19 @@
+version: "3.8"
+
+services:
+  bloghub:
+    build: .
+    container_name: bloghub-app
+    ports:
+      - "8080:8082"
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      DATABASE_USERNAME: ${DATABASE_USERNAME}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+    volumes:
+      - bloghub-data:/app/data
+      - bloghub-logs:/app/logs
+
+volumes:
+  bloghub-data:
+  bloghub-logs:
