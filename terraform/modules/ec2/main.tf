@@ -65,7 +65,7 @@ resource "aws_security_group" "backend_sg" {
 # FRONTEND EC2
 # -----------------------------
 resource "aws_instance" "app_server" {
-  ami                    = "ami-05d2d839d4f73aafb"
+  ami                    = "ami-0f58b397bc5c1f2e8 "
   instance_type          = "t3.micro"
   subnet_id              = var.public_subnet_id
   vpc_security_group_ids = [aws_security_group.app_sg.id]
