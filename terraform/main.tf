@@ -34,3 +34,12 @@ module "s3" {
   source      = "./modules/s3"
   bucket_name = var.app_logs_bucket_name
 }
+
+module "logs_export_lambda" {
+  source              = "./modules/logs-export-lambda"
+  project_name        = var.project_name
+  cloudwatch_group    = module.cloudwatch.log_group_name
+  destination_bucket  = module.s3.bucket_name
+  destination_prefix  = "bloghub/backend"
+  schedule_expression = "cron(0 9 * * ? *)"
+}

@@ -16,6 +16,10 @@ target/
 *.ear
 .mvn/timing.properties
 
+# Python
+__pycache__/
+*.py[cod]
+
 # Terraform
 **/.terraform/
 *.tfstate
