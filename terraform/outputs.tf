@@ -22,6 +22,4 @@ output "logs_bucket_name" {
   value = module.s3.bucket_name
 }
 
-output "logs_export_lambda_name" {
-  value = module.logs_export_lambda.function_name
-}
+
