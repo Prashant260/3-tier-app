@@ -1,6 +1,6 @@
 // auth.js - Session Authentication Helper
 async function syncCurrentUser() {
-  const response = await apiCall("https://bloghub-application.onrender.com/api/auth/me");
+  const response = await apiCall("/api/auth/me");
   if (!response) return;
 
   const data = await response.json();
@@ -59,7 +59,7 @@ async function apiCall(url, options = {}) {
 
 // Logout function
 async function logout() {
-  await apiCall("https://bloghub-application.onrender.com/api/auth/logout", { method: "POST" });
+  await apiCall("/api/auth/logout", { method: "POST" });
   sessionStorage.clear();
   window.location.href = "login.html";
 }

@@ -9,7 +9,7 @@ document.getElementById("user-form").addEventListener("submit", async (e) => {
   };
 
   try {
-    await apiPost("https://bloghub-application.onrender.com/api/auth/register", user);
+    await apiPost("/api/auth/register", user);
     showAlert("✅ User created successfully!", "success");
     setTimeout(() => (window.location.href = "users.html"), 1500);
   } catch (error) {

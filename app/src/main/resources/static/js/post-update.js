@@ -8,7 +8,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Fetch post details to pre-fill form
   async function loadPost() {
     try {
-      const res = await fetch(`https://bloghub-application.onrender.com/api/posts/${postId}`);
+      const res = await fetch(`/api/posts/${postId}`);
       if (!res.ok) throw new Error("Failed to fetch post");
       const post = await res.json();
       document.getElementById("postId").value = post.id;
@@ -38,7 +38,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     };
 
     try {
-      const res = await fetch(`https://bloghub-application.onrender.com/api/posts/${postId}`, {
+      const res = await fetch(`/api/posts/${postId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),

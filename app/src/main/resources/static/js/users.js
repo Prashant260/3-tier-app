@@ -4,7 +4,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 async function loadUsers() {
   try {
-    const users = await apiGet("https://bloghub-application.onrender.com/api/users");
+    const users = await apiGet("/api/users");
     displayUsers(users);
   } catch {
     showAlert("❌ Failed to load users.", "error");

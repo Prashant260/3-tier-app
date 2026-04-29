@@ -87,7 +87,7 @@ async function deleteCategory(catId) {
 
   try {
     const response = await fetch(
-      `https://bloghub-application.onrender.com/api/categories/${catId}`,
+      `/api/categories/${catId}`,
       { method: "DELETE" }
     );
 

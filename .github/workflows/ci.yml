@@ -62,6 +62,7 @@ jobs:
         run: |
           echo "DATABASE_URL=$(terraform output -raw database_url)" >> "$GITHUB_ENV"
           echo "APP_SERVER_IP=$(terraform output -raw app_server_ip)" >> "$GITHUB_ENV"
+          echo "CLOUDWATCH_LOG_GROUP=$(terraform output -raw cloudwatch_log_group_name)" >> "$GITHUB_ENV"
      
       - name: Build and push Docker image
         if: env.ACTION == 'apply'
@@ -93,6 +94,10 @@ jobs:
               -e DATABASE_URL="${{ env.DATABASE_URL }}" \
               -e DATABASE_USERNAME="${{ env.DATABASE_USERNAME }}" \
               -e DATABASE_PASSWORD="${{ secrets.DB_PASSWORD }}" \
+              --log-driver=awslogs \
+              --log-opt awslogs-region="${{ env.AWS_REGION }}" \
+              --log-opt awslogs-group="${{ env.CLOUDWATCH_LOG_GROUP }}" \
+              --log-opt awslogs-stream="bloghub" \
               --name bloghub \
               "$IMAGE"
 

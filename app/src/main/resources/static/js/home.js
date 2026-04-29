@@ -33,9 +33,9 @@ function showToast(message, type = "info") {
 // Fetch and display stats
 async function loadStats() {
   try {
-    const posts = await apiGet("https://bloghub-application.onrender.com/api/posts/getAll");
-    const authors = await apiGet("https://bloghub-application.onrender.com/api/users");
-    const categories = await apiGet("https://bloghub-application.onrender.com/api/categories");
+    const posts = await apiGet("/api/posts/getAll");
+    const authors = await apiGet("/api/users");
+    const categories = await apiGet("/api/categories");
 
     allPosts = posts || [];
     allAuthors = authors || [];
