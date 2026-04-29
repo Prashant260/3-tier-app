@@ -90,8 +90,8 @@ jobs:
 
             docker run -d \
               -p 8080:8082 \
-              -e DB_URL="${{ env.DATABASE_URL }}" \
-              -e DB_USER="${{ env.DATABASE_USERNAME }}" \
+              -e DB_URL= 'jdbc:postgresql://bloghub-dev.c9a00siiy283.ap-south-1.rds.amazonaws.com:5432/bloghub' \
+              -e DB_USER= 'bloghub_admin' \
               -e DB_PASSWORD="${{ secrets.DB_PASSWORD }}" \
               --name bloghub \
               $IMAGE
