@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>BlogHub Login</title>
+    <link href="/css/style.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+<header class="navbar">
+    <div class="nav-container">
+        <div class="nav-brand">
+            <i class="fas fa-feather-alt"></i>
+            <h1>BlogHub</h1>
+        </div>
+        <nav class="nav-menu" sec:authorize="isAuthenticated()">
+            <a class="nav-link active" href="/index.html">Home</a>
+            <a class="nav-link" href="/posts.html">All Posts</a>
+            <a class="nav-link" href="/categories.html">Categories</a>
+            <a class="nav-link" href="/post-create.html">Create Post</a>
+        </nav>
+        <div class="nav-actions">
+            <a class="hero-btn" href="/logout" sec:authorize="isAuthenticated()">Log out</a>
+        </div>
+    </div>
+</header>
+
+<main class="main-content">
+    <section class="hero-section">
+        <div class="hero-content">
+            <h1>Welcome to BlogHub</h1>
+            <p sec:authorize="isAnonymous()">Sign in or create an account with Cognito to continue.</p>
+            <p sec:authorize="isAuthenticated()">Hello, <strong th:text="${#authentication.name}">user</strong>.</p>
+            <a class="hero-btn" href="/oauth2/authorization/cognito" sec:authorize="isAnonymous()">
+                <i class="fas fa-right-to-bracket"></i> Log in / Sign up
+            </a>
+            <a class="hero-btn" href="/index.html" sec:authorize="isAuthenticated()">
+                <i class="fas fa-arrow-right"></i> Enter BlogHub
+            </a>
+        </div>
+    </section>
+</main>
+</body>
+</html>

@@ -100,6 +100,11 @@ jobs:
               -e DATABASE_URL="${{ env.DATABASE_URL }}" \
               -e DATABASE_USERNAME="${{ env.DATABASE_USERNAME }}" \
               -e DATABASE_PASSWORD="${{ secrets.DB_PASSWORD }}" \
+              -e COGNITO_CLIENT_SECRET="${{ secrets.COGNITO_CLIENT_SECRET }}" \
+              -e COGNITO_LOGOUT_DOMAIN="${{ secrets.COGNITO_LOGOUT_DOMAIN }}" \
+              -e COGNITO_LOGOUT_REDIRECT_URL="http://${{ env.APP_SERVER_IP }}:8080/" \
+              -e SESSION_COOKIE_SECURE="false" \
+              -e SESSION_COOKIE_SAME_SITE="lax" \
               --log-driver=awslogs \
               --log-opt awslogs-region="${{ env.AWS_REGION }}" \
               --log-opt awslogs-group="${{ env.CLOUDWATCH_LOG_GROUP }}" \
