@@ -62,7 +62,9 @@ jobs:
         working-directory: terraform
         run: |
           tf_output() {
-            terraform output -no-color -raw "$1" 2>/dev/null | sed '/^[[:space:]]*$/d' | tail -n 1
+            terraform output -no-color -raw "$1" 2>/dev/null \
+              | sed '/^[[:space:]]*$/d; /^[[:space:]]*[│╷╵]/d; /^[[:space:]]*Warning:/d' \
+              | head -n 1
           }
 
           printf 'DATABASE_URL=%s\n' "$(tf_output database_url)" >> "$GITHUB_ENV"
