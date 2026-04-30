@@ -1,7 +1,9 @@
 package com.bloghub.service;
 
+import com.bloghub.dto.AuthorRequestDto;
 import com.bloghub.dto.AuthorUpdateDto;
 import com.bloghub.entity.Author;
+import com.bloghub.exception.ResourceAlreadyExitsException;
 import com.bloghub.exception.ResourceNotFoundException;
 import com.bloghub.repository.AuthorRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +31,19 @@ public class AuthorService {
         }
 
         return author;// Retrieve an author by ID, throwing an exception if not found
+    }
+
+    public Author createAuthor(AuthorRequestDto authorRequestDto) {
+        if (authorRepository.existsByEmail(authorRequestDto.getEmail())) {
+            throw new ResourceAlreadyExitsException("Email already exists");
+        }
+
+        Author author = new Author();
+        author.setName(authorRequestDto.getName());
+        author.setEmail(authorRequestDto.getEmail());
+        author.setAbout(authorRequestDto.getAbout());
+
+        return authorRepository.save(author);
     }
 
     public void deleteAuthorById(Long id) {

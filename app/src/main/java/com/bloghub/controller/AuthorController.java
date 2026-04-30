@@ -1,9 +1,11 @@
 package com.bloghub.controller;
 
+import com.bloghub.dto.AuthorRequestDto;
 import com.bloghub.dto.AuthorResponseDto;
 import com.bloghub.dto.AuthorUpdateDto;
 import com.bloghub.entity.Author;
 import com.bloghub.service.AuthorService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -27,21 +29,22 @@ public class AuthorController {
         return ResponseEntity.ok(authorResponseDto);// Return the author details in the response
     }
 
+    @PostMapping
+    public ResponseEntity<AuthorResponseDto> createUser(@RequestBody @Valid AuthorRequestDto authorRequestDto) {
+        Author author = authorService.createAuthor(authorRequestDto);
+        AuthorResponseDto authorResponseDto = new AuthorResponseDto(author.getId(), author.getName(), author.getEmail(), author.getRole(), author.getAbout());
+        return new ResponseEntity<>(authorResponseDto, HttpStatus.CREATED);
+    }
+
     @PutMapping("/{id}")// Maps HTTP PUT requests to this method for updating an author by ID
-    public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestAttribute("currentUserId") Long currentUserId, @RequestBody AuthorUpdateDto authorUpdateDto, @RequestAttribute("currentUserRole") String currentUserRole) {
-        if (!currentUserId.equals(id) && !currentUserRole.equals("ADMIN")) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("{\"error\":\"You can update only your own account.\"}");
-        }
+    public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody AuthorUpdateDto authorUpdateDto) {
         Author updatedAuthor = authorService.updateAuthorById(id, authorUpdateDto);// Update the author using the service
         AuthorResponseDto authorResponseDto = new AuthorResponseDto(updatedAuthor.getId(), updatedAuthor.getName(), updatedAuthor.getEmail(), updatedAuthor.getRole(), updatedAuthor.getAbout());// Create a DTO for the updated author response
         return ResponseEntity.ok(authorResponseDto);// Return the updated author details in the response
     }
 
     @DeleteMapping("/{id}")// Maps HTTP DELETE requests to this method for deleting an author by ID
-    public ResponseEntity<String> deleteUser(@PathVariable Long id, @RequestAttribute("currentUserId") Long currentUserId, @RequestAttribute("currentUserRole") String currentUserRole) {
-        if (!currentUserId.equals(id) && !currentUserRole.equals("ADMIN")) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("{\"error\":You can delete only your own account.\"}");
-        }
+    public ResponseEntity<String> deleteUser(@PathVariable Long id) {
         authorService.deleteAuthorById(id);// Delete the author using the service
         return ResponseEntity.ok("{\"message\":\"Author deleted successfully.\"}");// Return a success message
     }

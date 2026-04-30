@@ -5,7 +5,6 @@ import com.bloghub.dto.PostResponseDto;
 import com.bloghub.dto.PostUpdateDto;
 import com.bloghub.entity.Post;
 import com.bloghub.service.PostService;
-import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -29,10 +28,7 @@ public class PostController {
 
     @PostMapping// Handles POST requests to create a new post
     public ResponseEntity<PostResponseDto> createPost(
-            @RequestBody @Valid PostRequestDto request,
-            HttpSession session) {
-        Long currentUserId = (Long) session.getAttribute("userId");
-        request.setAuthorId(currentUserId);// Set the author ID from the session
+            @RequestBody @Valid PostRequestDto request) {
         Post post = postService.createPost(request); // Create the post using PostService
         PostResponseDto response = new PostResponseDto(
                 post.getId(),
@@ -100,9 +96,9 @@ public class PostController {
 
     @GetMapping("/myPosts")// Handles GET requests to retrieve posts by the current user
     public ResponseEntity<List<PostResponseDto>> getMyPosts(
-            @RequestAttribute("currentUserID") Long currentUserId) {
+            @RequestParam Long authorId) {
 
-        List<Post> postList = postService.getPostByAuthor(currentUserId);
+        List<Post> postList = postService.getPostByAuthor(authorId);
 
         List<PostResponseDto> response = postList.stream().map(post -> {
             PostResponseDto dto = new PostResponseDto();
@@ -123,13 +119,7 @@ public class PostController {
     @PutMapping("/{postId}")// Handles PUT requests to update a post by ID
     public ResponseEntity<?> updatePost(
             @PathVariable Long postId,
-            @RequestBody @Valid PostUpdateDto request,
-            @RequestAttribute("currentUserId") Long currentUserId,
-            @RequestAttribute("currentUserRole") String currentUserRole) {
-        Post post = postService.getPostById(postId); // Update the post using PostService
-        if (!post.getAuthor().getId().equals(currentUserId) && !currentUserRole.equals("ADMIN")) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("{\"error\":\"You are not authorized to update this post.\"}");
-        }// Check if the current user is the author or an admin
+            @RequestBody @Valid PostUpdateDto request) {
         Post updatedPost = postService.updatePost(postId, request);
         PostResponseDto response = new PostResponseDto(
                 updatedPost.getId(),
@@ -144,19 +134,7 @@ public class PostController {
     }
 
     @DeleteMapping("/{postId}")// Handles DELETE requests to delete a post by ID
-    public ResponseEntity<?> deletePost(
-            @PathVariable Long postId,
-            @RequestAttribute("currentUserId") Long currentUserId,
-            @RequestAttribute("currentUserRole") String currentUserRole) {
-
-        if (currentUserId == null || currentUserRole == null) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("{\"error\":\"You are not authorized to delete this post.\"}");
-        }
-        //Admin can delete any post, author can delete their own post
-        Post existingPost = postService.getPostById(postId);
-        if (!currentUserRole.equals("ADMIN") && existingPost.getAuthor().getId().equals(currentUserId)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("{\"error\":\"You are not authorized to delete this post.\"}");
-        }
+    public ResponseEntity<?> deletePost(@PathVariable Long postId) {
         postService.deletePost(postId);
         return ResponseEntity.ok("{\"message\":\"Post deleted successfully...\"}");
 

@@ -157,11 +157,6 @@
         </div>
 
         <div class="form-group">
-          <label for="password">Password</label>
-          <input type="password" id="password" placeholder="Enter password" required />
-        </div>
-
-        <div class="form-group">
           <label for="about">About (Optional)</label>
           <textarea id="about" placeholder="Tell us about yourself..."></textarea>
         </div>
@@ -176,18 +171,7 @@
     <script src="js/main.js"></script>
     <script src="js/user-create.js"></script>
     <script>
-      // Check authentication on page load
       window.addEventListener('DOMContentLoaded', () => {
-        if (!sessionStorage.getItem('userName')) {
-          window.location.href = 'login.html';
-        }
-        
-        // Check if user is admin
-        if (sessionStorage.getItem('userRole') !== 'ADMIN') {
-          alert('Access denied. Admin only.');
-          window.location.href = 'index.html';
-        }
-        
         updateNavbar();
         applyRoleBasedUI();
       });

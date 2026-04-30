@@ -4,12 +4,11 @@ document.getElementById("user-form").addEventListener("submit", async (e) => {
   const user = {
     name: document.getElementById("name").value,
     email: document.getElementById("email").value,
-    password: document.getElementById("password").value,
     about: document.getElementById("about").value,
   };
 
   try {
-    await apiPost("/api/auth/register", user);
+    await apiPost("/api/users", user);
     showAlert("✅ User created successfully!", "success");
     setTimeout(() => (window.location.href = "users.html"), 1500);
   } catch (error) {

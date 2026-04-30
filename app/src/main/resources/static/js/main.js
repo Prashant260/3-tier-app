@@ -26,72 +26,48 @@ function initTheme() {
   }
 }
 
-// Simple API GET (with session cookies)
+// Simple API GET
 async function apiGet(url) {
   const response = await fetch(url, {
     method: 'GET',
-    headers: { 'Content-Type': 'application/json' },
-    credentials: 'include' // ← Important: Send cookies with request
+    headers: { 'Content-Type': 'application/json' }
   });
-  
-  if (response.status === 401 || response.status === 403) {
-    window.location.href = 'login.html';
-    return null;
-  }
-  
+
   if (!response.ok) throw new Error('Request failed');
   return await response.json();
 }
 
-// Simple API POST (with session cookies)
+// Simple API POST
 async function apiPost(url, data) {
   const response = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    credentials: 'include', // ← Important: Send cookies with request
     body: JSON.stringify(data)
   });
-  
-  if (response.status === 401 || response.status === 403) {
-    window.location.href = 'login.html';
-    return null;
-  }
-  
+
   if (!response.ok) throw new Error('Request failed');
   return await response.json();
 }
 
-// Simple API DELETE (with session cookies)
+// Simple API DELETE
 async function apiDelete(url) {
   const response = await fetch(url, {
     method: 'DELETE',
-    headers: { 'Content-Type': 'application/json' },
-    credentials: 'include' // ← Important: Send cookies with request
+    headers: { 'Content-Type': 'application/json' }
   });
-  
-  if (response.status === 401 || response.status === 403) {
-    window.location.href = 'login.html';
-    return null;
-  }
-  
+
   if (!response.ok) throw new Error('Request failed');
   return true;
 }
 
-// Simple API PUT (with session cookies)
+// Simple API PUT
 async function apiPut(url, data) {
   const response = await fetch(url, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
-    credentials: 'include', // ← Important: Send cookies with request
     body: JSON.stringify(data)
   });
-  
-  if (response.status === 401 || response.status === 403) {
-    window.location.href = 'login.html';
-    return null;
-  }
-  
+
   if (!response.ok) throw new Error('Request failed');
   return await response.json();
 }
@@ -109,45 +85,19 @@ function showToast(message, type = "info") {
   }, 3000);
 }
 
-// Update navbar with user info
+// Navbar placeholder for future authentication integration
 function updateNavbar() {
-  const userName = sessionStorage.getItem('userName');
-  const userRole = sessionStorage.getItem('userRole');
-  
-  if (!userName) return;
-
-  // Add user info to navbar
-  const navActions = document.querySelector('.nav-actions');
-  if (navActions) {
-    navActions.innerHTML = `
-      <span style="color: var(--text-primary); margin-right: 10px;">
-        👤 ${userName} ${userRole === 'ADMIN' ? '(Admin)' : ''}
-      </span>
-      <button onclick="logout()" class="btn-primary btn-sm">Logout</button>
-    `;
-  }
+  return;
 }
 
-// Logout function - calls backend to invalidate session
+// Logout placeholder for future authentication integration
 async function logout() {
-  try {
-    // Call backend logout endpoint to invalidate session
-    await fetch('/api/auth/logout', {
-      method: 'POST',
-      credentials: 'include' // Send session cookie
-    });
-  } catch (error) {
-    console.error('Logout error:', error);
-  }
-  
-  // Clear frontend session data
   sessionStorage.clear();
-  window.location.href = 'login.html';
 }
 
 // Check if user is admin
 function isAdmin() {
-  return sessionStorage.getItem('userRole') === 'ADMIN';
+  return true;
 }
 
 // Hide elements for non-admin users

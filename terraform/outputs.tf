@@ -14,12 +14,3 @@ output "database_url" {
   value = module.rds.database_url
 }
 
-output "cloudwatch_log_group_name" {
-  value = module.cloudwatch.log_group_name
-}
-
-output "logs_bucket_name" {
-  value = module.s3.bucket_name
-}
-
-

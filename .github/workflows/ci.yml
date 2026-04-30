@@ -22,6 +22,7 @@ jobs:
       DOCKER_IMAGE: ${{ secrets.DOCKERHUB_USERNAME }}/bloghub:${{ github.sha }}
       DOCKER_IMAGE_LATEST: ${{ secrets.DOCKERHUB_USERNAME }}/bloghub:latest
       DATABASE_USERNAME: bloghub_admin
+      CLOUDWATCH_LOG_GROUP: /bloghub/backend
 
     steps:
       - name: Checkout code
@@ -60,9 +61,12 @@ jobs:
         if: env.ACTION == 'apply'
         working-directory: terraform
         run: |
-          echo "DATABASE_URL=$(terraform output -raw database_url)" >> "$GITHUB_ENV"
-          echo "APP_SERVER_IP=$(terraform output -raw app_server_ip)" >> "$GITHUB_ENV"
-          echo "CLOUDWATCH_LOG_GROUP=$(terraform output -raw cloudwatch_log_group_name)" >> "$GITHUB_ENV"
+          tf_output() {
+            terraform output -no-color -raw "$1" 2>/dev/null | sed '/^[[:space:]]*$/d' | tail -n 1
+          }
+
+          printf 'DATABASE_URL=%s\n' "$(tf_output database_url)" >> "$GITHUB_ENV"
+          printf 'APP_SERVER_IP=%s\n' "$(tf_output app_server_ip)" >> "$GITHUB_ENV"
      
       - name: Build and push Docker image
         if: env.ACTION == 'apply'

@@ -148,18 +148,7 @@
     <script src="js/main.js"></script>
     <script src="js/users.js"></script>
     <script>
-      // Check authentication on page load
       window.addEventListener('DOMContentLoaded', () => {
-        if (!sessionStorage.getItem('userName')) {
-          window.location.href = 'login.html';
-        }
-        
-        // Check if user is admin
-        if (sessionStorage.getItem('userRole') !== 'ADMIN') {
-          alert('Access denied. Admin only.');
-          window.location.href = 'index.html';
-        }
-        
         updateNavbar();
         applyRoleBasedUI();
       });

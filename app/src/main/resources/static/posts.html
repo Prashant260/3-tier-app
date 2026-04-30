@@ -199,11 +199,7 @@
     <script src="js/main.js"></script>
     <script src="js/posts.js"></script>
     <script>
-      // Check authentication on page load
       window.addEventListener('DOMContentLoaded', () => {
-        if (!sessionStorage.getItem('userName')) {
-          window.location.href = 'login.html';
-        }
         updateNavbar();
         applyRoleBasedUI();
       });

@@ -61,9 +61,6 @@ Useful outputs:
 ```bash
 terraform output app_server_ip
 terraform output database_url
-terraform output cloudwatch_log_group_name
-terraform output logs_bucket_name
-terraform output logs_export_lambda_name
 ```
 
 ## CloudWatch Logs
@@ -108,27 +105,6 @@ Check exported files:
 
 ```bash
 aws s3 ls s3://prashant-app-logs-storage-bucket-1-0777/bloghub/backend/ --recursive --region ap-south-1
-```
-
-## Lambda Log Export
-
-Terraform includes a Lambda that exports the last 24 hours of CloudWatch logs to S3.
-
-It can be triggered manually:
-
-```bash
-aws lambda invoke \
-  --region ap-south-1 \
-  --function-name "$(terraform output -raw logs_export_lambda_name)" \
-  response.json
-```
-
-It is also scheduled with EventBridge to run every day at `2:30 PM IST`.
-
-AWS cron expression:
-
-```text
-cron(0 9 * * ? *)
 ```
 
 ## CI/CD
